@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VulnLens · AI security code review (Neural Storm FT-05)</title>
+<style>
+:root{--bg:#0f1218;--card:#171c25;--line:#273042;--ink:#e8ecf3;--mute:#93a0b5;--hi:#ff6b5b;--mid:#ffb547;--lo:#3ccf91;--acc:#6aa8ff}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+header{padding:28px 24px 8px;max-width:1180px;margin:auto}h1{margin:0;font-size:26px}h1 span{color:var(--acc)}
+header p{color:var(--mute);margin:6px 0 0}main{max-width:1180px;margin:auto;padding:16px 24px 40px;display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+textarea{width:100%;height:420px;background:#0b0e13;color:#d6e2ff;border:1px solid var(--line);border-radius:8px;padding:12px;font:13px/1.45 ui-monospace,Consolas,monospace;resize:vertical}
+.row{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+select,button{background:#0b0e13;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit}
+button.primary{background:var(--acc);color:#081120;border:0;font-weight:600;cursor:pointer}
+.gauge{display:flex;align-items:center;gap:16px}.big{font-size:44px;font-weight:700}
+.bar{height:10px;border-radius:5px;background:#0b0e13;overflow:hidden;flex:1}.bar i{display:block;height:100%}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600}
+.f{border-top:1px solid var(--line);padding:8px 0}.f code{display:block;color:#c9d6ee;font-size:12px;white-space:pre-wrap;word-break:break-all}
+.mute{color:var(--mute);font-size:13px}table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:5px 4px;border-bottom:1px solid var(--line);text-align:left}
+.c-pos{color:var(--hi)}.c-neg{color:var(--lo)}h3{margin:4px 0 10px;font-size:15px}footer{max-width:1180px;margin:auto;padding:0 24px 30px;color:var(--mute);font-size:12px}
+</style></head><body>
+<header><h1>Vuln<span>Lens</span> — AI security review for C/C++ functions</h1>
+<p>Neural Storm 2026 · Track 1 Future Tech · FT-05 AI-Powered Automated Code Review. Paste a function: an ML model trained on 21,854 real open-source functions (Devign) scores its vulnerability risk, explains why, and a CWE rule pass points at lines to fix. Runs fully in your browser — your code never leaves the page.</p></header>
+<main>
+<section class="card">
+<div class="row"><select id="ex"></select><button class="primary" id="go">Review code</button><span class="mute" id="lat"></span></div>
+<textarea id="code" spellcheck="false"></textarea>
+</section>
+<section>
+<div class="card" id="out"><h3>Risk</h3><p class="mute">Pick an example or paste a function, then press Review.</p></div>
+<div class="card" style="margin-top:18px"><h3>Measured on the held-out Devign test set</h3><div id="metrics" class="mute">loading…</div></div>
+</section>
+</main>
+<footer>Model: TF-IDF over normalised code tokens + 19 hand-crafted risk features → logistic regression (scikit-learn, trained in Python, exported to JSON). A risk score is a triage signal, not proof of a bug; always confirm with a human reviewer and a fuzzer/static analyser.</footer>
+<script src="vulnlens.js"></script>
+<script>
+let M=null;const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+Promise.all([fetch("model.json").then(r=>r.json()),fetch("metrics.json").then(r=>r.json()),fetch("examples.json").then(r=>r.json())]).then(([m,met,ex])=>{
+  M=m;ex.forEach((e,i)=>{const o=document.createElement("option");o.value=i;o.textContent=e.name;$("ex").appendChild(o)});
+  $("ex").onchange=()=>{$("code").value=ex[$("ex").value].code;run()};$("code").value=ex[0].code;run();
+  const a=met.test_accuracy_mode,r=met.test_review_mode,p=x=>(100*x).toFixed(1)+"%";
+  $("metrics").innerHTML=`<table><tr><th></th><th>Accuracy</th><th>F1</th><th>ROC-AUC</th></tr>
+  <tr><td>VulnLens (precision mode, t=${met.thr_accuracy_mode})</td><td>${p(a.accuracy)}</td><td>${p(a.f1)}</td><td>${a.roc_auc.toFixed(3)}</td></tr>
+  <tr><td>VulnLens (review mode, t=${met.thr_review_mode})</td><td>${p(r.accuracy)}</td><td>${p(r.f1)}</td><td>${r.roc_auc.toFixed(3)}</td></tr>
+  <tr><td>Majority-class baseline</td><td>${p(met.majority_baseline_accuracy)}</td><td>—</td><td>0.500</td></tr></table>
+  <p>Latency: ${met.latency_ms.p50.toFixed(1)} ms p50 / ${met.latency_ms.p95.toFixed(1)} ms p95 per function (Python, CPU). n = ${met.splits.test} test functions, never seen in training or tuning.</p>`;
+});
+function run(){if(!M)return;const code=$("code").value,t0=performance.now(),s=VulnLens.score(M,code),f=VulnLens.review(code),ms=performance.now()-t0;
+  $("lat").textContent=`scored in ${ms.toFixed(1)} ms in-browser`;
+  const pct=Math.round(s.p*100),col=s.p>=M.threshold?"var(--hi)":s.p>=0.4?"var(--mid)":"var(--lo)",lab=s.p>=M.threshold?"HIGH — review carefully":s.p>=0.4?"MEDIUM":"LOW";
+  let h=`<h3>Risk</h3><div class="gauge"><div class="big" style="color:${col}">${pct}</div><div style="flex:1"><div class="bar"><i style="width:${pct}%;background:${col}"></i></div><div class="mute" style="margin-top:6px"><span class="pill" style="background:${col};color:#081120">${lab}</span> probability this function is vulnerable</div></div></div>`;
+  h+=`<h3 style="margin-top:16px">Line findings (${f.length})</h3>`+(f.length?f.map(x=>`<div class="f"><b>L${x.line}</b> <span class="pill" style="background:#273042">${x.cwe}</span> ${esc(x.title)}<div class="mute">${esc(x.advice)}</div><code>${esc(x.snippet)}</code></div>`).join(""):`<p class="mute">No rule matched. The ML score above still reflects learned patterns.</p>`);
+  h+=`<h3 style="margin-top:16px">Why the model thinks so</h3><table>`+s.top.map(x=>`<tr><td><code>${esc(x.term)}</code></td><td class="${x.c>0?"c-pos":"c-neg"}">${x.c>0?"▲ raises":"▼ lowers"} risk ${Math.abs(x.c).toFixed(3)}</td></tr>`).join("")+`</table>`;
+  $("out").innerHTML=h}
+$("go").onclick=run;
+</script></body></html>

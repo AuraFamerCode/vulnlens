@@ -1,0 +1,9 @@
+scikit-learn>=1.4
+numpy
+scipy
+pandas
+pyarrow
+joblib
+huggingface_hub
+gradio>=4
+pytest

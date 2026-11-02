@@ -1,0 +1,22 @@
+[
+ {
+  "name": "Hand-written: classic overflow + UAF",
+  "code": "int handle_packet(struct conn *c, const char *payload, size_t len) {\n    char name[32];\n    char *buf = malloc(c->count * c->item_size);\n    if (!buf)\n        return -1;\n    strcpy(name, payload);              /* attacker controls payload */\n    memcpy(buf, payload + 4, len);      /* len never checked */\n    for (int i = 0; i <= c->count; i++)\n        buf[i + 1] = name[i];\n    printf(name);\n    free(buf);\n    log_packet(c, buf);\n    return 0;\n}"
+ },
+ {
+  "name": "Real qemu fn, labelled VULNERABLE (test id 9189)",
+  "code": "static TRBCCode xhci_disable_ep(XHCIState *xhci, unsigned int slotid,\n                               unsigned int epid)\n{\n    XHCISlot *slot;\n    XHCIEPContext *epctx;\n    int i;\n    trace_usb_xhci_ep_disable(slotid, epid);\n    assert(slotid >= 1 && slotid <= xhci->numslots);\n    assert(epid >= 1 && epid <= 31);\n    slot = &xhci->slots[slotid-1];\n    if (!slot->eps[epid-1]) {\n        DPRINTF(\"xhci: slot %d ep %d already disabled\\n\", slotid, epid);\n        return CC_SUCCESS;\n    xhci_ep_nuke_xfers(xhci, slotid, epid);\n    epctx = slot->eps[epid-1];\n    if (epctx->nr_pstreams) {\n        xhci_free_streams(epctx);\n    xhci_set_ep_state(xhci, epctx, NULL, EP_DISABLED);\n    timer_free(epctx->kick_timer);\n    g_free(epctx);\n    slot->eps[epid-1] = NULL;\n    return CC_SUCCESS;"
+ },
+ {
+  "name": "Real FFmpeg fn, labelled VULNERABLE (test id 26435)",
+  "code": "static inline void hyscale_fast_c(SwsContext *c, int16_t *dst, int dstWidth,\n\n                                  const uint8_t *src, int srcW, int xInc)\n\n{\n\n    int i;\n\n    unsigned int xpos=0;\n\n    for (i=0;i<dstWidth;i++) {\n\n        register unsigned int xx=xpos>>16;\n\n        register unsigned int xalpha=(xpos&0xFFFF)>>9;\n\n        dst[i]= (src[xx]<<7) + (src[xx+1] - src[xx])*xalpha;\n\n        xpos+=xInc;\n\n    }\n\n\n\n}"
+ },
+ {
+  "name": "Real qemu fn, labelled safe (test id 23516)",
+  "code": "static uint64_t omap_mpui_io_read(void *opaque, target_phys_addr_t addr,\n\n                                  unsigned size)\n\n{\n\n    if (size != 2) {\n\n        return omap_badwidth_read16(opaque, addr);\n\n    }\n\n\n\n    if (addr == OMAP_MPUI_BASE)\t/* CMR */\n\n        return 0xfe4d;\n\n\n\n    OMAP_BAD_REG(addr);\n\n    return 0;\n\n}\n"
+ },
+ {
+  "name": "Hand-written: bounded copy (known false positive, see README)",
+  "code": "static int copy_name(char *dst, size_t dst_len, const char *src) {\n    if (dst == NULL || src == NULL || dst_len == 0)\n        return -1;\n    size_t n = strnlen(src, dst_len - 1);\n    memcpy(dst, src, n);\n    dst[n] = '\\0';\n    return (int)n;\n}"
+ }
+]

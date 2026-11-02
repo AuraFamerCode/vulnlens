@@ -1,0 +1,129 @@
+{
+  "dataset": "CodeXGLUE Defect Detection (Devign), google/code_x_glue_cc_defect_detection",
+  "splits": {
+    "train": 21854,
+    "validation": 2732,
+    "test": 2732
+  },
+  "grid": [
+    {
+      "max_features": 10000,
+      "C": 0.5,
+      "val_accuracy": 0.6398243045387995
+    },
+    {
+      "max_features": 10000,
+      "C": 1.0,
+      "val_accuracy": 0.6489751098096632
+    },
+    {
+      "max_features": 10000,
+      "C": 2.0,
+      "val_accuracy": 0.6423865300146413
+    },
+    {
+      "max_features": 30000,
+      "C": 0.5,
+      "val_accuracy": 0.6500732064421669
+    },
+    {
+      "max_features": 30000,
+      "C": 1.0,
+      "val_accuracy": 0.6595900439238653
+    },
+    {
+      "max_features": 30000,
+      "C": 2.0,
+      "val_accuracy": 0.6577598828696926
+    },
+    {
+      "max_features": 100000,
+      "C": 0.5,
+      "val_accuracy": 0.6493411420204978
+    },
+    {
+      "max_features": 100000,
+      "C": 1.0,
+      "val_accuracy": 0.6584919472913616
+    },
+    {
+      "max_features": 100000,
+      "C": 2.0,
+      "val_accuracy": 0.6566617862371888
+    }
+  ],
+  "picked": {
+    "max_features": 30000,
+    "C": 1.0,
+    "val_accuracy": 0.6595900439238653
+  },
+  "thr_accuracy_mode": 0.51,
+  "thr_review_mode": 0.3,
+  "test_accuracy_mode": {
+    "accuracy": 0.6365300146412884,
+    "precision": 0.6289370078740157,
+    "recall": 0.5091633466135458,
+    "f1": 0.5627476882430648,
+    "roc_auc": 0.7043093705071387,
+    "confusion": [
+      [
+        1100,
+        377
+      ],
+      [
+        616,
+        639
+      ]
+    ],
+    "accuracy_ci95": [
+      0.6185852855051245,
+      0.6552068081991215
+    ],
+    "f1_ci95": [
+      0.5362996726957474,
+      0.5862362122149563
+    ]
+  },
+  "test_review_mode": {
+    "accuracy": 0.5724743777452416,
+    "precision": 0.5194283162125949,
+    "recall": 0.9266932270916335,
+    "f1": 0.6657126502575844,
+    "roc_auc": 0.7043093705071387,
+    "confusion": [
+      [
+        401,
+        1076
+      ],
+      [
+        92,
+        1163
+      ]
+    ],
+    "f1_ci95": [
+      0.6492968723483692,
+      0.6830539516378127
+    ]
+  },
+  "test_exact_dupes_of_train": 17,
+  "test_dedup_accuracy": 0.6394106813996316,
+  "majority_baseline_accuracy": 0.5406295754026355,
+  "per_project": {
+    "FFmpeg": {
+      "n": 976,
+      "accuracy": 0.5983606557377049
+    },
+    "qemu": {
+      "n": 1756,
+      "accuracy": 0.657744874715262
+    }
+  },
+  "latency_ms": {
+    "p50": 0.9450859998878514,
+    "p95": 2.0385328498150566,
+    "batch_throughput_funcs_per_s": 2426.066864412883,
+    "cpu": "aarch64",
+    "cores": 2
+  },
+  "web_model_bytes": 970941
+}
