@@ -4,7 +4,7 @@
 
 **Team:** VulnLens (solo) · **Member:** Kanish Patidar (B.Tech CSE, LNCT Bhopal) · GitHub [@AuraFamerCode](https://github.com/AuraFamerCode)
 
-**Live demo:** _(Netlify link goes here once deployed)_ · runs 100% in the browser, no code leaves your machine.
+**Live demo:** https://vulnlens.netlify.app · runs 100% in the browser, no code leaves your machine.
 
 ![VulnLens demo](docs/demo.gif)
 
