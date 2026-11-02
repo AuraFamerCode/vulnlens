@@ -76,7 +76,7 @@ python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\
 pip install -r requirements.txt
 
 python scripts/get_data.py      # downloads the 3 Devign parquet files (~22 MB) into data/
-python train.py                 # ~5 min on a laptop CPU; writes models/, results/metrics.json, web/model.json
+python train.py                 # ~10 min on a 2-core CPU; writes models/, results/metrics.json, web/model.json
 pytest -q                       # 9 tests (unit, model round-trip, JS/Python parity, metric sanity)
 
 python app.py                   # Gradio UI on http://127.0.0.1:7860
